@@ -4382,23 +4382,18 @@ void avformat_close_input(AVFormatContext **ps)
 
 AVStream *avformat_new_stream(AVFormatContext *s, const AVCodec *c)
 {
-    av_log(s, AV_LOG_INFO, "avformat_new_stream enter");
     AVStream *st;
     int i;
     AVStream **streams;
 
     if (s->nb_streams >= FFMIN(s->max_streams, INT_MAX/sizeof(*streams))) {
-          av_log(s, AV_LOG_INFO, "avformat_new_stream  --1--");
-        if (s->max_streams < INT_MAX/sizeof(*streams)){
+        if (s->max_streams < INT_MAX/sizeof(*streams))
             av_log(s, AV_LOG_ERROR, "Number of streams exceeds max_streams parameter (%d), see the documentation if you wish to increase it\n", s->max_streams);
-            return NULL;
-        }
+        return NULL;
     }
     streams = av_realloc_array(s->streams, s->nb_streams + 1, sizeof(*streams));
-    if (!streams){
-        av_log(s, AV_LOG_INFO, "avformat_new_stream  --2--");
-         return NULL;
-    }
+    if (!streams)
+        return NULL;
     s->streams = streams;
 
     st = av_mallocz(sizeof(AVStream));
@@ -4406,7 +4401,6 @@ AVStream *avformat_new_stream(AVFormatContext *s, const AVCodec *c)
         return NULL;
     if (!(st->info = av_mallocz(sizeof(*st->info)))) {
         av_free(st);
-        av_log(s, AV_LOG_INFO, "avformat_new_stream  --3--");
         return NULL;
     }
     st->info->last_dts = AV_NOPTS_VALUE;
@@ -4417,7 +4411,6 @@ FF_DISABLE_DEPRECATION_WARNINGS
     if (!st->codec) {
         av_free(st->info);
         av_free(st);
-        av_log(s, AV_LOG_INFO, "avformat_new_stream  --4--");
         return NULL;
     }
 FF_ENABLE_DEPRECATION_WARNINGS
@@ -4432,10 +4425,8 @@ FF_ENABLE_DEPRECATION_WARNINGS
         goto fail;
 
     st->internal->avctx = avcodec_alloc_context3(NULL);
-    if (!st->internal->avctx){
-        av_log(s, AV_LOG_INFO, "avformat_new_stream  -- 5--");
+    if (!st->internal->avctx)
         goto fail;
-    }
 
     if (s->iformat) {
 #if FF_API_LAVF_AVCTX
@@ -4482,11 +4473,9 @@ FF_ENABLE_DEPRECATION_WARNINGS
     st->internal->need_context_update = 1;
 
     s->streams[s->nb_streams++] = st;
-    av_log(s, AV_LOG_INFO, "avformat_new_stream  ok");
     return st;
 fail:
     free_stream(&st);
-    av_log(s, AV_LOG_INFO, "avformat_new_stream  fail");
     return NULL;
 }
 
